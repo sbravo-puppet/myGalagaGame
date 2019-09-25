@@ -22,6 +22,7 @@ let personToBeat; // used to find which score to place the new score above in js
 
 let galagaTitleImg; // picture on main menu page
 let playSong; // song during game
+let playSong2; // victory song
 
 let starArr = new Array(80);
 let comet; // comet sprite
@@ -37,9 +38,13 @@ let maverickFire1Img;
 let maverickFire2Arr = []; // powerUp ship fire array of sprites
 let maverickFire2Img;
 
+let mavPlasmaArr = []; // powerUp ship fire array of sprites
+let mavPlasmaImg;
+
 let maverickHealth = 200;
 let mavFireSound;
 let mavFireTwoSound;
+let mavPlasmaSound;
 let mavHitSound;
 let mavDeathSound;
 
@@ -65,6 +70,10 @@ let powerUp; // powerUp sprite
 let powerUpSound;
 let powerUpCounter = 0;
 
+//HTML elements
+// let name;
+// let nameInput;
+// let nameInputButton;
 let playButton;
 let highScoreButton;
 let endGameButton;
@@ -75,6 +84,7 @@ let tutorialButton;
 function preload() {
   galagaTitleImg = loadImage('assets/galagaTitle.png');
   playSong = loadSound('assets/sound/MachinimaSound.com_-_Escape_from_the_Temple.mp3');
+  playSong2 = loadSound('assets/sound/MachinimaSound.com_-_Queen_of_the_Night.mp3');
   gameFont = loadFont('assets/Bahamas_Light_Regular.ttf');
 
   maverickImg = loadImage('assets/maverick/maverick00.png');
@@ -82,6 +92,8 @@ function preload() {
   mavFireSound = loadSound('assets/sound/mavFire.mp3');
   maverickFire2Img = loadImage('assets/maverick/mavfireTwo01.png');
   mavFireTwoSound = loadSound('assets/sound/mavFireTwo.wav');
+  mavPlasmaImg = loadImage('assets/maverick/mavPlasma00.png');
+  mavPlasmaSound = loadSound('assets/sound/mavPlasma.mp3');
   mavHitSound = loadSound('assets/sound/mavHit.mp3');
   mavDeathSound = loadSound('assets/sound/mavDeath.mp3');
   explosion = loadAnimation('assets/explosion01.png', 'assets/explosion05.png');
@@ -114,6 +126,23 @@ function setup() {
   video.addCue(14.8, videoEnded);
   video.hide();
   video.noLoop();
+
+  // nameInput = createInput('', text);
+  // nameInput.elt.isContentEditable = true;
+  // nameInput.elt.maxLength = 10;
+  // nameInput.position(width/2 - 125, height/3 + 30);
+  // nameInput.size(250,50);
+  // nameInput.style('font-size', '2em');
+  // nameInput.hide();
+
+  // name = nameInput.value();
+
+  // nameInputButton = createButton('Name:');
+  // nameInputButton.style('font-size', '2em');
+  // nameInputButton.position(width/2 - 125 - 255, height/3 + 30);
+  // nameInputButton.size(120,40);
+  // nameInputButton.mouseClicked(nameInputButtonClicked);
+  // nameInputButton.hide();
 
   playButton = createButton('Easy Mode');
   playButton.style('font-size', '2em');
@@ -188,12 +217,11 @@ function playButtonClicked() {
   highScoreButton.hide();
   hardModeButton.hide();
   tutorialButton.hide();
+  // nameInput.hide();
+  // nameInputButton.hide();
   endGameButton.show();
   //start music
-  playSong.connect();
-  playSong.playMode('restart');
-  playSong.play();
-  playSong.jump(141, 80);
+  playSong.jump(128, 115);
   playSong.loop();
   //create main ship
   maverick = createSprite(width/2, height - maverickImg.height-20, maverickImg.width, maverickImg.height);
@@ -249,12 +277,11 @@ function hardModeButtonClicked() {
   hardModeButton.hide();
   highScoreButton.hide();
   tutorialButton.hide();
+  // nameInput.hide();
+  // nameInputButton.hide();
   endGameButton.show();
   //start music
-  playSong.connect();
-  playSong.playMode('restart');
-  playSong.play();
-  playSong.jump(141, 80);
+  playSong.jump(128, 115);
   playSong.loop();
   //create main ship
   maverick = createSprite(width/2, height - maverickImg.height-20, maverickImg.width, maverickImg.height);
@@ -310,6 +337,8 @@ function highScoreButtonClicked() {
   playButton.hide();
   hardModeButton.hide();
   tutorialButton.hide();
+  // nameInput.hide();
+  // nameInputButton.hide();
   mainMenuButton.show();
 }
 
@@ -319,6 +348,8 @@ function tutorialButtonClicked() {
   highScoreButton.hide();
   playButton.hide();
   hardModeButton.hide();
+  // nameInput.hide();
+  // nameInputButton.hide();
 }
 
 function endGameButtonClicked() {
@@ -327,7 +358,6 @@ function endGameButtonClicked() {
   mainMenuButton.show();
   // remove all sprites, reset all values
   playSong.stop();
-  playSong.disconnect();
   playTime = 0;
   enemyTwoCounter = 0;
   mavFireMode = 1;
@@ -385,7 +415,7 @@ function mainMenuButtonClicked() {
   currentScreen = MAIN_MENU;
   mainMenuButton.hide();
   playButton.show();
-  // reset score 
+  playSong2.stop();
   score = 0;
 }
 
@@ -404,11 +434,14 @@ function drawLoadingScreen () {
 }
 
 function drawMainMenuScreen () {
+  video.stop();
+  // nameInput.show();
+  // nameInputButton.show();
   playButton.show();
   highScoreButton.show();
   hardModeButton.show();
   tutorialButton.show();
-  video.stop();
+
   background('black');
 
   image(galagaTitleImg, width/2, 150);
@@ -446,7 +479,6 @@ function drawPlayGameScreen () {
     maverickHealth -= 1;
     if(maverickHealth == 0 && maverick.removed == false) {
       playSong.stop();
-      playSong.disconnect();
       mavDeathSound.setVolume(0.3);
       mavDeathSound.play();
     }
@@ -473,10 +505,10 @@ function drawPlayGameScreen () {
   for(let i = 0; i<enemyOne.length; i++) {
     if(enemyOne[i].position.y > 100) {
       enemyOne[i].position.y -= 2;
-      enemyOne[i].position.x +=  sin(frameCount / 25) * 5;
+      enemyOne[i].position.x +=  sin(playTime / 25) * 5;
     }
   }
-  //collision detection between mav fire and enemyOne - kills enemyOne
+  //collision detection between mavfireOne and enemyOne - kills enemyOne
   for(let i=0; i<enemyOne.length; i++){
     for(let j=0; j<maverickFire1Arr.length; j++){
       if(maverickFire1Arr[j].overlap(enemyOne[i])) {
@@ -520,7 +552,6 @@ function drawPlayGameScreen () {
       maverickHealth -= 20;
       if(maverickHealth == 0 && maverick.removed == false) {
         playSong.stop();
-        playSong.disconnect();
         mavDeathSound.setVolume(0.3);
         mavDeathSound.play();
       }
@@ -537,6 +568,7 @@ function drawPlayGameScreen () {
     textAlign(CENTER, CENTER);
     textSize(60);
     text('GAME OVER', width/2, height/2);
+    accomplishedCounter++;
   }
   //enemyTwo show up when enemyOne dies
   if(enemyOne.length == 0) {
@@ -576,6 +608,18 @@ function drawPlayGameScreen () {
       }      
     }
   }
+  //collision detection between mavPlasma and EnemyTwo - bounces and shrinks enemyTwo
+  for(let i=0; i<enemyTwo.length; i++){
+    for(let j=0; j<mavPlasmaArr.length; j++){
+      if(mavPlasmaArr[j].displace(enemyTwo[i])) {
+        enemyTwo[i].scale -= 0.1;
+        enemyTwo[i].friction = 0.01;
+        enemyTwoHealth[i] -=25;
+        score+=50;
+        // maverickFire2Arr[j].remove();
+      }      
+    }
+  }
   //enemyTwo loses all health - enemyTwo explodes
   for(let i=0; i<enemyTwo.length; i++){
     if(enemyTwoHealth[i] <= 0) {
@@ -612,9 +656,8 @@ function drawPlayGameScreen () {
       enemyFireTwoArr[i].remove();
       mavHitSound.play();
       maverickHealth -= 60;
-      if(maverickHealth <= 0 && maverick.removed == false) {
+      if(maverickHealth == 0 && maverick.removed == false) {
         playSong.stop();
-        playSong.disconnect();
         mavDeathSound.setVolume(0.3);
         mavDeathSound.play();
       }
@@ -630,7 +673,7 @@ function drawPlayGameScreen () {
     powerUp.remove();
     powerUp = createSprite(random(0 + powerUpImg.width, width - powerUpImg.width), -500, powerUpImg.width, powerUpImg.height);
     powerUp.addAnimation('fly', 'assets/powerUp01.png', 'assets/powerUp02.png');
-    mavFireMode = 2;
+    mavFireMode = round(random(2,3));
   }
   //if powerup isn't collected
   if(enemyOne.length == 0 && powerUp.position.y > height*2) {
@@ -638,7 +681,7 @@ function drawPlayGameScreen () {
     powerUp.position.x = random(0,width);
   }
   //maverick powerUp fire mode only lasts 5 seconds
-  if(mavFireMode == 2 && maverickHealth > 0) {
+  if(mavFireMode == 2 || mavFireMode == 3 && maverickHealth > 0) {
     maverick.changeAnimation('mavPowerUp');
     powerUpCounter++
     if(powerUpCounter == 300) {
@@ -652,7 +695,6 @@ function drawPlayGameScreen () {
     maverickHealth -= 3;
     if(maverickHealth == 0 && maverick.removed == false) {
       playSong.stop();
-      playSong.disconnect();
       mavDeathSound.setVolume(0.3);
       mavDeathSound.play();
     }
@@ -687,18 +729,34 @@ function drawPlayGameScreen () {
       }
     }      
   }
+  //collision detection between mavFirePlasma and Boss
+  for(let i=0; i<mavPlasmaArr.length; i++){
+    if(mavPlasmaArr[i].displace(boss)) {
+      bossHealth -=4;
+      score+=100;
+        // boss explodes
+      if(bossHealth <= 0) {
+        enemyDeathSound.setVolume(0.3);
+        enemyDeathSound.play();
+        boss.changeAnimation('explosion');
+        boss.animation.looping = false;
+      }
+    }      
+  }
   // remove boss after explosion
   if(boss.animation.looping == false && boss.animation.getFrame() == 6) {
-    boss.remove();
     playSong.stop();
-    playSong.disconnect();
+    boss.remove();
     textAlign(CENTER, CENTER);
     textSize(60);
     fill('blue');
     text('MISSION ACCOMPLISHED', width/2, height/2);
     accomplishedCounter++;
   }
-  if(accomplishedCounter == 240) {
+  if(accomplishedCounter == 1 && boss.animation.looping == false) {
+    playSong2.jump(32,158);
+  }
+  if(accomplishedCounter == 300) {
     endGameButtonClicked();
   }
   //if all of enemyTwo die, the boss comes out
@@ -795,7 +853,6 @@ function drawHardModeScreen () {
     maverickHealth -= 3;
     if(maverickHealth == 0 && maverick.removed == false) {
       playSong.stop();
-      playSong.disconnect();
       mavDeathSound.setVolume(0.3);
       mavDeathSound.play();
     }
@@ -822,7 +879,7 @@ function drawHardModeScreen () {
   for(let i = 0; i<enemyOne.length; i++) {
     if(enemyOne[i].position.y > 100) {
       enemyOne[i].position.y -= 2;
-      enemyOne[i].position.x +=  sin(frameCount / 25) * 5;
+      enemyOne[i].position.x +=  sin(playTime / 25) * 5;
     }
   }
   //collision detection between mav fire and enemyOne - kills enemyOne
@@ -869,7 +926,6 @@ function drawHardModeScreen () {
       maverickHealth -= 40;
       if(maverickHealth == 0 && maverick.removed == false) {
         playSong.stop();
-        playSong.disconnect();
         mavDeathSound.setVolume(0.3);
         mavDeathSound.play();
       }
@@ -886,6 +942,7 @@ function drawHardModeScreen () {
     textAlign(CENTER, CENTER);
     textSize(60);
     text('GAME OVER', width/2, height/2);
+    accomplishedCounter++;
   }
   //enemyTwo show up when enemyOne dies
   if(enemyOne.length == 0) {
@@ -907,7 +964,7 @@ function drawHardModeScreen () {
       if(maverickFire1Arr[j].bounce(enemyTwo[i])) {
         enemyTwo[i].scale -= 0.01;
         enemyTwo[i].friction = 0.01;
-        enemyTwoHealth[i] -=3;
+        enemyTwoHealth[i] -=5;
         score+=100;
         maverickFire1Arr[j].remove();
       }      
@@ -919,9 +976,20 @@ function drawHardModeScreen () {
       if(maverickFire2Arr[j].bounce(enemyTwo[i])) {
         enemyTwo[i].scale -= 0.02;
         enemyTwo[i].friction = 0.01;
-        enemyTwoHealth[i] -=6;
+        enemyTwoHealth[i] -=8;
         score+=100;
         maverickFire2Arr[j].remove();
+      }      
+    }
+  }
+  //collision detection between mavPlasma and EnemyTwo - bounces and shrinks enemyTwo
+  for(let i=0; i<enemyTwo.length; i++){
+    for(let j=0; j<mavPlasmaArr.length; j++){
+      if(mavPlasmaArr[j].displace(enemyTwo[i])) {
+        enemyTwo[i].scale -= 0.05;
+        enemyTwo[i].friction = 0.01;
+        enemyTwoHealth[i] -=8;
+        score+=30;
       }      
     }
   }
@@ -961,9 +1029,8 @@ function drawHardModeScreen () {
       enemyFireTwoArr[i].remove();
       mavHitSound.play();
       maverickHealth -= 80;
-      if(maverickHealth <= 0 && maverick.removed == false) {
+      if(maverickHealth == 0 && maverick.removed == false) {
         playSong.stop();
-        playSong.disconnect();
         mavDeathSound.setVolume(0.3);
         mavDeathSound.play();
       }
@@ -979,15 +1046,14 @@ function drawHardModeScreen () {
     powerUp.remove();
     powerUp = createSprite(random(0 + powerUpImg.width, width - powerUpImg.width), -500, powerUpImg.width, powerUpImg.height);
     powerUp.addAnimation('fly', 'assets/powerUp01.png', 'assets/powerUp02.png');
-    mavFireMode = 2;
+    mavFireMode = round(random(2,3));
   }
   //if powerup isn't collected
   if(enemyOne.length == 0 && powerUp.position.y > height*2) {
     powerUp.position.y = -height*2;
-
   }
   //maverick powerUp fire mode only lasts 5 seconds
-  if(mavFireMode == 2 && maverickHealth > 0) {
+  if(mavFireMode == 2 || mavFireMode == 3 && maverickHealth > 0) {
     maverick.changeAnimation('mavPowerUp');
     powerUpCounter++
     if(powerUpCounter == 300) {
@@ -1001,7 +1067,6 @@ function drawHardModeScreen () {
     maverickHealth -= 5;
     if(maverickHealth == 0 && maverick.removed == false) {
       playSong.stop();
-      playSong.disconnect();
       mavDeathSound.setVolume(0.3);
       mavDeathSound.play();
     }
@@ -1036,18 +1101,34 @@ function drawHardModeScreen () {
       }
     }      
   }
-  // remove boss after explosion
+  //collision detection between mavFirePlasma and Boss
+  for(let i=0; i<mavPlasmaArr.length; i++){
+    if(mavPlasmaArr[i].displace(boss)) {
+      bossHealth -=5;
+      score+=100;
+      // boss explodes
+      if(bossHealth <= 0) {
+        enemyDeathSound.setVolume(0.3);
+        enemyDeathSound.play();
+        boss.changeAnimation('explosion');
+        boss.animation.looping = false;
+      }
+    }      
+  }
+  //remove boss after explosion
   if(boss.animation.looping == false && boss.animation.getFrame() == 6) {
     boss.remove();
     playSong.stop();
-    playSong.disconnect();
     textAlign(CENTER, CENTER);
     textSize(60);
     fill('blue');
     text('MISSION ACCOMPLISHED', width/2, height/2);
     accomplishedCounter++;
   }
-  if(accomplishedCounter == 240) {
+  if(accomplishedCounter == 1 && boss.animation.looping == false) {
+    playSong2.jump(32,158);
+  }
+  if(accomplishedCounter == 300) {
     endGameButtonClicked();
   }
   //if all of enemyTwo die, the boss comes out
@@ -1164,16 +1245,16 @@ function maverickShip() {
 }
 
 function keyPressed() {
-  if (key === ' ' && maverick.removed == false && mavFireMode == 1) {
+  if (key === ' ' && playTime > 0 && maverick.removed == false && mavFireMode == 1 && currentScreen != MAIN_MENU) {
     //space bar for shooting NORMAL fire
     mavFireSound.setVolume(0.2);
     mavFireSound.play();
     let fire = createSprite(maverick.position.x, maverick.position.y - maverickFire1Img.height - 40, maverickFire1Img.width, maverickFire1Img.height);
     fire.addAnimation('fire', 'assets/maverick/mavfireOne01.png', 'assets/maverick/mavfireOne04.png');
-    fire.setVelocity(0, -8);
+    fire.setVelocity(0, -10);
     maverickFire1Arr.push(fire);
   }
-  if (key === ' ' && maverick.removed == false && mavFireMode == 2) {
+  if (key === ' ' && playTime > 0 && maverick.removed == false && mavFireMode == 2 && currentScreen != MAIN_MENU) {
     //space bar for shooting POWERUP fire
     mavFireTwoSound.setVolume(0.2);
     mavFireTwoSound.play();
@@ -1185,14 +1266,23 @@ function keyPressed() {
     fire3.addAnimation('fire', 'assets/maverick/mavfireTwo01.png', 'assets/maverick/mavfireTwo04.png');
     let fire4 = createSprite(maverick.position.x + 3, maverick.position.y - maverickFire1Img.height, maverickFire1Img.width, maverickFire1Img.height);
     fire4.addAnimation('fire', 'assets/maverick/mavfireTwo01.png', 'assets/maverick/mavfireTwo04.png');
-    fire1.setVelocity(-5, -8);
-    fire2.setVelocity(-1, -8);
-    fire3.setVelocity(1, -8);
-    fire4.setVelocity(5, -8);
+    fire1.setVelocity(-5, -10);
+    fire2.setVelocity(-1, -10);
+    fire3.setVelocity(1, -10);
+    fire4.setVelocity(5, -10);
     maverickFire2Arr.push(fire1);
     maverickFire2Arr.push(fire2);
     maverickFire2Arr.push(fire3);
     maverickFire2Arr.push(fire4);
+  }
+  if (key === ' ' && playTime > 0 && maverick.removed == false && mavFireMode == 3 && currentScreen != MAIN_MENU) {
+    //space bar for shooting POWERUP fire
+    mavPlasmaSound.setVolume(1);
+    mavPlasmaSound.play();
+    let fire = createSprite(maverick.position.x, maverick.position.y - maverickFire1Img.height-40, maverickFire1Img.width, maverickFire1Img.height);
+    fire.addAnimation('fire', 'assets/maverick/mavPlasma00.png', 'assets/maverick/mavPlasma03.png');    
+    fire.setVelocity(0, -20);
+    mavPlasmaArr.push(fire);
   }
   return false;
 }
