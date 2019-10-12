@@ -1,0 +1,29 @@
+{ 
+   "highscores": [ 
+      {  
+         "name": "ButchPuppet",
+         "score": 2100,
+		 "accuracy": 75
+      },
+      {  
+         "name": "CaseyLeeW",
+         "score": 1825,
+ 		 "accuracy": 60
+      },
+      {  
+         "name": "T.Hunt",
+         "score": 1360,
+		 "accuracy": 95
+      },
+      {  
+         "name": "FullertonCourt",
+         "score": 885,
+		 "accuracy": 70
+      },
+      {  
+         "name": "PeggGun",
+         "score": 300,
+		 "accuracy": 50
+      }
+   ]
+}
