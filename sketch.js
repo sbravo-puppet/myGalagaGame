@@ -13,6 +13,9 @@ let loadingCount = 0;
 let video; // TUTORIAL video
 //GENERIC GAME SETTINGS
 let galagaTitleImg; // picture on main menu page
+const EASY = 1,
+      HARD = 2;
+let gameDifficulty = EASY;
 let playSong;
 let playSong2;
 let playTime = 0; // counter for general play events
@@ -208,6 +211,7 @@ function videoEnded() { //used to change to MAIN MENU screen after video plays
 }
 
 function easyModeButtonClicked() { //initiates EASY mode game
+  gameDifficulty = EASY;
   easyModeSettings(); // EASY mode settings are applied
   currentScreen = GAME_PLAY;
   easyModeButton.hide();
@@ -283,6 +287,7 @@ function easyModeButtonClicked() { //initiates EASY mode game
 }
 
 function hardModeButtonClicked() { //initiates HARD mode game
+  gameDifficulty = HARD;
   hardModeSettings(); // HARD mode settings are applied
   currentScreen = GAME_PLAY;
   easyModeButton.hide();
@@ -857,8 +862,19 @@ function drawGamePlayScreen () { //displays GAME PLAY screen
       }
     }      
   }
-  // remove boss after explosion
-  if(boss.animation.looping == false && boss.animation.getFrame() == 6) {
+  // remove boss after explosion EASY MODE
+  if(boss.animation.looping == false && boss.animation.getFrame() == 6 && gameDifficulty == EASY) {
+    playSong.stop();
+    boss.remove();
+    textAlign(CENTER, CENTER);
+    textSize(60);
+    fill('blue');
+    text('MISSION COMPLETE LOL', width/2, height/2);
+    text('Maverick, your score is ' + score, width/2, height/3);
+    accomplishedCounter++;
+  }
+    // remove boss after explosion HARD MODE
+  if(boss.animation.looping == false && boss.animation.getFrame() == 6 && gameDifficulty == HARD) {
     playSong.stop();
     boss.remove();
     textAlign(CENTER, CENTER);
